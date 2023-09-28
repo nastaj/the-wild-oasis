@@ -2,6 +2,7 @@ import { cloneElement, createContext, useContext, useState } from "react";
 import { createPortal } from "react-dom";
 import { HiXMark } from "react-icons/hi2";
 import styled from "styled-components";
+import { useOutsideClick } from "../hooks/useOutsideClick";
 
 const StyledModal = styled.div`
   position: fixed;
@@ -52,8 +53,10 @@ const Button = styled.button`
   }
 `;
 
+// 1. Create a context
 const ModalContext = createContext();
 
+// 2. Create parent component
 function Modal({ children }) {
   const [openName, setOpenName] = useState("");
 
@@ -67,6 +70,7 @@ function Modal({ children }) {
   );
 }
 
+// 3. Create child components to help implementing the common task
 function Open({ children, opens: opensWindowName }) {
   const { open } = useContext(ModalContext);
 
@@ -76,11 +80,13 @@ function Open({ children, opens: opensWindowName }) {
 function Window({ children, name }) {
   const { openName, close } = useContext(ModalContext);
 
+  const ref = useOutsideClick(close);
+
   if (name !== openName) return null;
 
   return createPortal(
     <Overlay>
-      <StyledModal>
+      <StyledModal ref={ref}>
         <Button onClick={close}>
           <HiXMark />
         </Button>
@@ -92,6 +98,7 @@ function Window({ children, name }) {
   );
 }
 
+// 4. Add child components as proeprties to parent component
 Modal.Open = Open;
 Modal.Window = Window;
 
